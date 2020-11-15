@@ -1,3 +1,3 @@
 # ray-tracing-in-one-weekend
 
-[ray-tracing-in-one-weekend wiki](ray-tracing-in-one-weekend/wiki)
+[wiki](https://github.com/murmur-wheel/ray-tracing-in-one-weekend/wiki)
