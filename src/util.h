@@ -56,6 +56,13 @@ struct Vec3 {
     z /= rhs.z;
     return *this;
   }
+  Vec3& operator/=(Float v) {
+    Float inv = 1 / v;
+    x *= inv;
+    y *= inv;
+    z *= inv;
+    return *this;
+  }
 };
 
 inline Vec3 operator*(Float t, const Vec3& v) { return v * t; }
@@ -78,6 +85,18 @@ inline Vec3 cross(const Vec3& v1, const Vec3& v2) {
   Float y = v1.z * v2.x - v1.x * v2.z;
   Float z = v1.x * v2.y - v1.y * v2.x;
   return Vec3(x, y, z);
+}
+
+inline Vec3 random_in_unit_sphere() {
+  Vec3 p;
+  do {
+    p = 2.0 * Vec3(drand48(), drand48(), drand48()) - Vec3(1);
+  } while (squared_length(p) >= 1.0);
+  return p;
+}
+
+inline Vec3 reflect(const Vec3& v, const Vec3& n) {
+  return v - 2 * dot(v, n) * n;
 }
 
 struct Bitmap {
