@@ -60,9 +60,11 @@ struct Vec3 {
 
 inline Vec3 operator*(Float t, const Vec3& v) { return v * t; }
 
-inline Float squared_length(const Vec3& v) {
-  return v.x * v.x + v.y * v.y + v.z * v.z;
+inline Float dot(const Vec3& v1, const Vec3& v2) {
+  return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
+
+inline Float squared_length(const Vec3& v) { return dot(v, v); }
 
 inline Float length(const Vec3& v) { return std::sqrt(squared_length(v)); }
 
