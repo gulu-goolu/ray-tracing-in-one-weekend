@@ -1,5 +1,6 @@
 #include <cfloat>
 
+#include "material.h"
 #include "util.h"
 
 Vec3 background(const Ray& ray) {
@@ -7,15 +8,6 @@ Vec3 background(const Ray& ray) {
   Float t = (n.y + 1) * 0.5;
   return (1 - t) * Vec3(1) + t * Vec3(0.5, 0.7, 1.0);
 }
-
-class Material;
-
-struct HitRecord {
-  Float t;
-  Vec3 position;
-  Vec3 normal;
-  const Material* material = nullptr;
-};
 
 class Hitable {
  public:
@@ -109,44 +101,6 @@ class Camera {
   Vec3 vertical;
 };
 
-class Material {
- public:
-  virtual bool scatter(const Ray& ray_in, const HitRecord& hit_rec,
-                       Vec3& attenuation, Ray& scattered) const = 0;
-};
-
-class Lambertian : public Material {
- public:
-  Lambertian(const Vec3& albedo) : albedo(albedo) {}
-
-  bool scatter(const Ray& ray_in, const HitRecord& hit_rec, Vec3& attenuation,
-               Ray& scattered) const override {
-    Vec3 target = hit_rec.position + hit_rec.normal + random_in_unit_sphere();
-    scattered = Ray(hit_rec.position, target - hit_rec.position);
-    attenuation = albedo;
-    return true;
-  }
-
- private:
-  Vec3 albedo;
-};
-
-class Metal : public Material {
- public:
-  Metal(Vec3 albedo) : albedo(albedo) {}
-
-  bool scatter(const Ray& ray_in, const HitRecord& hit_rec, Vec3& attenuation,
-               Ray& scattered) const override {
-    Vec3 reflected = reflect(normalize(ray_in.direction), hit_rec.normal);
-    scattered = Ray(hit_rec.position, reflected);
-    attenuation = albedo;
-    return dot(scattered.direction, hit_rec.normal) > 0;
-  }
-
- private:
-  Vec3 albedo;
-};
-
 Vec3 color(const Ray& r, Hitable* world, int depth) {
   HitRecord rec;
   if (world->hit(r, 0.001, FLT_MAX, &rec)) {
@@ -177,15 +131,17 @@ int main(int argc, char* argv[]) {
   const Vec3 vertical(0, -2, 0);
   const Vec3 origin(0);
 
-  Hitable* list[4];
+  Hitable* list[5];
   list[0] =
-      new Sphere(Vec3(0, 0, -1), 0.5f, new Lambertian(Vec3(0.8, 0.3, 0.3)));
+      new Sphere(Vec3(0, 0, -1), 0.5f, new Lambertian(Vec3(0.1, 0.2, 0.5)));
   list[1] =
       new Sphere(Vec3(0, -100.5, -1), 100, new Lambertian(Vec3(0.8, 0.8, 0.0)));
-  list[2] = new Sphere(Vec3(1, 0, -1), 0.5, new Metal(Vec3(0.8, 0.6, 0.2)));
-  list[3] = new Sphere(Vec3(-1, 0, -1), 0.5, new Metal(Vec3(0.8, 0.8, 0.8)));
+  list[2] =
+      new Sphere(Vec3(1, 0, -1), 0.5, new Metal(Vec3(0.8, 0.6, 0.2), 0.0));
+  list[3] = new Sphere(Vec3(-1, 0, -1), 0.5, new Dielectric(1.5));
+  list[4] = new Sphere(Vec3(-1, 0, -1), -0.45, new Dielectric(1.5));
 
-  Hitable* world = new HitableList(list, 4);
+  Hitable* world = new HitableList(list, 5);
 
   Camera camera;
   for (int row = 0; row < bitmap.rows; row++) {
