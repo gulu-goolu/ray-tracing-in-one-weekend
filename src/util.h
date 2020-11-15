@@ -10,8 +10,8 @@ using Float = float;
 struct Vec3 {
   Float x, y, z;
   Vec3() : x(0), y(0), z(0) {}
-  Vec3(Float a) : x(a), y(a), z(a) {}
-  Vec3(Float x_, Float y_, Float z_) : x(x_), y(y_), z(z_) {}
+  explicit Vec3(Float a) : x(a), y(a), z(a) {}
+  explicit Vec3(Float x_, Float y_, Float z_) : x(x_), y(y_), z(z_) {}
 
   Vec3 operator-() const { return Vec3(-x, -y, -z); }
   Float& operator[](int i) { return (&x)[i]; }
@@ -20,6 +20,7 @@ struct Vec3 {
   Vec3 operator+(const Vec3& rhs) const {
     return Vec3(x + rhs.x, y + rhs.y, z + rhs.z);
   }
+  Vec3 operator+(Float a) const { return Vec3(x + a, y + a, z + a); }
   Vec3 operator-(const Vec3& rhs) const {
     return Vec3(x - rhs.x, y - rhs.y, z - rhs.z);
   }
@@ -57,6 +58,8 @@ struct Vec3 {
   }
 };
 
+inline Vec3 operator*(Float t, const Vec3& v) { return v * t; }
+
 inline Float squared_length(const Vec3& v) {
   return v.x * v.x + v.y * v.y + v.z * v.z;
 }
@@ -81,18 +84,27 @@ struct Bitmap {
     data.resize(total);
   }
 
-  Vec3* operator[](int i) {
-    const int pos = i * cols;
+  Vec3* operator[](int row) {
+    const int pos = row * cols;
     return &data[pos];
   }
 
-  const Vec3* operator[](int i) const {
-    const int pos = i * cols;
+  const Vec3* operator[](int row) const {
+    const int pos = row * cols;
     return &data[pos];
   }
 
   const int cols, rows;
   std::vector<Vec3> data;
+};
+
+struct Ray {
+  Vec3 origin;
+  Vec3 direction;
+
+  Ray() = default;
+  explicit Ray(const Vec3& origin, const Vec3& direction)
+      : origin(origin), direction(direction) {}
 };
 
 // example: save_as_png(bitmap, "output.png");
